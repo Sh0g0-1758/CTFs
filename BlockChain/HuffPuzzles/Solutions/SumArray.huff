@@ -1,0 +1,42 @@
+
+/** 
+ *  SUM_ARRAY HUFF EXERCISE
+ *
+ *  
+ *  The task is to write within the `MAIN` macro below, write a functionality that takes an array of uint256 as an argument and returns the sum of all the numbers
+ *
+ *  NOTICE: The contract should revert when an unrecognized function is called
+ */
+
+#define function sumArray(uint256[]) payable returns(uint256)
+
+
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xe0 shr
+    __FUNC_SIG(sumArray) eq sum_array jumpi
+    revert
+
+    sum_array:
+    // <----------info from degatchi-------------> 
+    // 1st 32-bytes = offset, 2nd 32-bytes = length, the rest are elements.
+
+    0x00 0x00 mstore // answer
+    0x44 0x20 mstore // offset
+    0x24 calldataload // size
+    loop:
+    dup1 0x00 eq end jumpi
+    0x01 swap1 sub
+    0x20 mload
+    calldataload
+    0x00 mload
+    add
+    0x00 mstore
+    0x20 mload
+    0x20 add
+    0x20 mstore
+    loop jump
+    revert
+
+    end:
+    0x20 0x00 return
+}

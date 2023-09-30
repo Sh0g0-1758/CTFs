@@ -1,0 +1,93 @@
+
+/** 
+ *  SUM_ARRAY HUFF EXERCISE
+ *
+ * In this puzzle, the task is to simulate an array in Huff using the "exact" storage pattern as solidity. Expected functions can; 
+ *      - Push numbers onto a array, 
+ *      - Pop the last index from the array,
+ *      - View what's stored at an index, 
+ *      - Gets the length of the array, 
+ *      - Write to an index if it is valid.
+ *
+ *      - Writes and reads outside of length revert. 
+ *      - Popping off a zero length array reverts.
+ *
+ *  NOTICE: The contract should revert when an unrecognized function is called
+ */
+
+#define function pushh(uint256 num) payable returns()
+#define function popp() payable returns()
+#define function read(uint256 index) payable returns(uint256)
+#define function length() payable returns(uint256)
+#define function write(uint256 index, uint256 num) payable returns()
+
+#define error OutOfBounds()
+#define error ZeroArray()
+
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 0x69 sstore // for length of the array
+    0x00 calldataload 0xe0 shr
+    __FUNC_SIG(pushh) eq op_push jumpi
+    0x00 calldataload 0xe0 shr
+    __FUNC_SIG(popp) eq op_pop jumpi
+    0x00 calldataload 0xe0 shr
+    __FUNC_SIG(read) eq op_read jumpi
+    0x00 calldataload 0xe0 shr
+    __FUNC_SIG(length) eq op_length jumpi
+    0x00 calldataload 0xe0 shr
+    __FUNC_SIG(write) eq op_write jumpi
+    revert
+
+    zero_array_error:
+    __ERROR(ZeroArray)
+    0x00 mstore
+    0x04 0x00 revert
+
+    out_of_bounds_error:
+    __ERROR(OutOfBounds)
+    0x00 mstore
+    0x04 0x00 revert
+
+    op_push:
+    0x04 calldataload
+    0x69 sload
+    sstore
+    0x69 sload
+    0x01 add
+    0x69 sstore
+    done jump
+
+    op_pop:
+    0x69 sload 0x00 eq zero_array_error jumpi
+    0x01 0x69 sload sub // to get current pointer of the stack
+    dup1 // [cur_pointer,cur_pointer]
+    0x00 swap1 // [cur_pointer,0,cur_pointer]
+    sstore // [cur_pointer]
+    0x69 sstore // update the length of the array now. 
+    done jump
+
+    op_length:
+    0x69 sload 0x00 mstore
+    0x20 0x00 return
+
+    op_write:
+    0x69 sload // [length]
+    0x04 calldataload // [key,length]
+    lt safe jumpi
+    out_of_bounds_error jump
+    safe:
+    0x24 calldataload 0x04 calldataload // [key,value]
+    sstore
+    done jump
+
+    op_read:
+    0x69 sload
+    0x04 calldataload // [key,length]
+    lt safer jumpi
+    out_of_bounds_error jump
+    safer:
+    0x04 calldataload sload 0x00 mstore
+    0x20 0x00 return
+
+    done:
+}
