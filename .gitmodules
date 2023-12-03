@@ -1,0 +1,3 @@
+[submodule "BlockChain/BlazCTF/lib/forge-std"]
+	path = BlockChain/BlazCTF/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
